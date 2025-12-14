@@ -1,15 +1,17 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import streamlit as st
+from sklearn.neighbors import KNeighborsClassifier
 
 # Page configuration
 st.set_page_config(page_title="Weather Classifier", layout="wide")
 
 # Title and description
-st.title("🌦️ KNN Weather Classification")
+st.title("🌦️ K-Nearest-Neighbor Weather Classification")
+st.markdown("> Hello Everyone, so lets proceed.")
 st.markdown("""
-This app uses K-Nearest Neighbors (KNN) to classify weather conditions 
-based on temperature and humidity levels.
+_This app uses K-Nearest Neighbors(KNN) from scikit-learn to classify weather conditions 
+based on temperature and humidity levels._
 """)
 
 # Training data
@@ -29,55 +31,16 @@ label_map = {
     1: "Rainy"
 }
 
-# Custom KNN implementation (no sklearn needed!)
-class SimpleKNN:
-    def __init__(self, n_neighbors=3):
-        self.n_neighbors = n_neighbors
-        self.x_train = None
-        self.y_train = None
-    
-    def fit(self, x, y):
-        self.x_train = x
-        self. y_train = y
-        return self
-    
-    def _euclidean_distance(self, x1, x2):
-        return np.sqrt(np.sum((x1 - x2) ** 2))
-    
-    def predict(self, x):
-        predictions = []
-        for sample in x:
-            distances = [self._euclidean_distance(sample, x_train) for x_train in self. x_train]
-            k_indices = np.argsort(distances)[:self.n_neighbors]
-            k_labels = self.y_train[k_indices]
-            prediction = np.bincount(k_labels).argmax()
-            predictions.append(prediction)
-        return np.array(predictions)
-    
-    def predict_proba(self, x):
-        probabilities = []
-        for sample in x:
-            distances = [self._euclidean_distance(sample, x_train) for x_train in self.x_train]
-            k_indices = np. argsort(distances)[:self.n_neighbors]
-            k_labels = self.y_train[k_indices]
-            
-            # Count occurrences
-            sunny_count = np.sum(k_labels == 0)
-            rainy_count = np.sum(k_labels == 1)
-            
-            # Calculate probabilities
-            proba = np.array([sunny_count / self.n_neighbors, rainy_count / self.n_neighbors])
-            probabilities.append(proba)
-        return np.array(probabilities)
-
-# Train the model
-knn = SimpleKNN(n_neighbors=3)
-knn.fit(x, y)
 
 # Sidebar for user input
 st.sidebar.header("📊 Input Parameters")
 temperature = st.sidebar.slider("Temperature (°C)", min_value=20, max_value=35, value=26, step=1)
 humidity = st.sidebar.slider("Humidity (%)", min_value=50, max_value=90, value=78, step=1)
+
+# Train the model using scikit-learn's KNeighborsClassifier
+n = st.sidebar.slider("KNN value", min_value=1, max_value=10, value=3, step=1)
+knn = KNeighborsClassifier(n_neighbors=n)
+knn.fit(x, y)
 
 # Make prediction
 new_weather = np.array([[temperature, humidity]])
@@ -99,7 +62,7 @@ else:
 st.sidebar.metric("Confidence", f"{confidence:.1f}%")
 
 # Main content - Create visualization
-col1, col2 = st. columns(2)
+col1, col2 = st.columns(2)
 
 with col1:
     st.subheader("📈 Classification Visualization")
@@ -107,13 +70,13 @@ with col1:
     fig, ax = plt.subplots(figsize=(8, 6))
     
     # Plot training data
-    ax.scatter(x[y==0, 0], x[y==0, 1], color="orange", label="Sunny", s=150, edgecolor="k", alpha=0.7)
-    ax.scatter(x[y==1, 0], x[y==1, 1], color="blue", label="Rainy", s=150, edgecolor="k", alpha=0.7)
+    ax.scatter(x[y==0, 0], x[y==0, 1], color="orange", label="Sunny", s=100, edgecolor="k", alpha=0.7)
+    ax.scatter(x[y==1, 0], x[y==1, 1], color="blue", label="Rainy", s=100, edgecolor="k", alpha=0.7)
     
     # Plot new prediction
     colors = ["orange", "blue"]
     ax.scatter(new_weather[0, 0], new_weather[0, 1],
-               color=colors[pred], marker="*", s=800, edgecolor="black", 
+               color=colors[pred], marker="*", s=300, edgecolor="black", 
                label=f"New day:  {weather_label}", zorder=5)
     
     ax.set_xlabel("Temperature (°C)", fontsize=12, fontweight="bold")
@@ -133,21 +96,50 @@ with col2:
     st.write(f"- Total samples: {len(x)}")
     st.write(f"- Sunny days: {np.sum(y==0)}")
     st.write(f"- Rainy days: {np.sum(y==1)}")
-    st.write(f"- K-neighbors: 3")
+    st.write(f"- K-neighbors: {n}")
     
     st.markdown("---")
     st.write("**Current Input:**")
     st.write(f"- Temperature: **{temperature}°C**")
     st.write(f"- Humidity: **{humidity}%**")
+    st.write(f"- Nth neighbor: **{n}**")
     
     st.markdown("---")
     st.write("**Prediction Details:**")
-    col_sunny, col_rainy = st. columns(2)
+    col_sunny, col_rainy = st.columns(2)
     with col_sunny:
-        st. metric("Sunny Probability", f"{pred_proba[0]*100:.1f}%")
+        st.metric("Sunny Probability", f"{pred_proba[0]*100:.1f}%")
     with col_rainy: 
         st.metric("Rainy Probability", f"{pred_proba[1]*100:.1f}%")
 
 # Footer
 st.markdown("---")
-st.caption("🔬 Built with Streamlit | KNN Weather Classification Model")
+st.caption(" KNN Weather Classification Model")
+
+# Whats is knn and how it works?
+with st.expander("ℹ️ K-Nearest Neighbor Information:"):
+    st.markdown('''
+                **❓What is KNN?**
+                - It a simple, supervised machine learning algorithm used for both classification (labeling data) and regression (predicting values) by finding the 'k' closest training data points (neighbors) to a new data point, then using a majority vote (classification) or average (regression) to make a prediction.
+                
+                ---
+
+                **💭How it works?**
+
+                1. **Training**: 
+                - Stores all training data points with their labels
+                2. **Prediction**: 
+                - Calculates distance to all training points
+                - Finds K closest neighbors
+                - Takes majority vote of their labels
+                3. **Key Parameters**:
+                - **Temperature**: Temperature of new weather for prediction
+                - **Humidity**: Humidity of new weather for prediction
+                - **K**: Number of neighbors to consider
+
+                ---
+
+                **⬇️For This Model:**
+                - High Temperature + Low Humidity → Sunny☀️
+                - Low Temperature + High Humidity → Rainy🌧️
+                ''')
