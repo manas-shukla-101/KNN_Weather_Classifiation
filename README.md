@@ -29,7 +29,9 @@ The model utilizes a small training set of temperature and humidity pairings:
 1. Clone this repository.
 2. Install dependencies:
    ```bash
-   pip install -r requirements.txt ```
+   pip install -r requirements.txt
+   ```
 4. Run the app:
    ```bash
-   streamlit run main.py.```
+   streamlit run main.py
+   ```
