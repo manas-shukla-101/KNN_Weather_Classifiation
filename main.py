@@ -4,7 +4,21 @@ import streamlit as st
 from sklearn.neighbors import KNeighborsClassifier
 
 # Page configuration
-st.set_page_config(page_title="Weather Classifier", layout="wide")
+st.set_page_config(page_title="Weather Classifier", layout="wide", page_icon="icon.png")
+st.sidebar.markdown("---")
+st.logo("icon.png")
+st.markdown(
+    """
+    ---
+    <style>
+        [alt=Logo] {
+            height: 6rem; /* Adjust this value */
+            margin-top: 3rem;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
 # Title and description
 st.title("🌦️ K-Nearest-Neighbor Weather Classification")
